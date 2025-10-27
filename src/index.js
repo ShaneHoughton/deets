@@ -8,6 +8,7 @@ const END_DATE = core.getInput("end-date"); // MM/DD/YYYY
 const TZ = core.getInput("timezone"); // e.g., "America/New_York"
 const OUTPUT_NAME = core.getInput("file-output-name"); // e.g., "CHANGELOG.md"
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || core.getInput("github-token");
+core.info(GITHUB_TOKEN.length);
 
 const isListElement = (line) => {
   return /^(- |\d+\.\s|[a-zA-Z]\.\s)/.test(line);

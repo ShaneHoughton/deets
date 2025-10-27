@@ -2,6 +2,9 @@ name: Get the deets
 description: Get the details about changes from merged pull requests and output them to a markdown file.
 
 inputs:
+  github-token:
+    description: GitHub token
+    required: true
   start-date:
     description: date to start from
     required: false
