@@ -5,26 +5,26 @@ inputs:
   github-token:
     description: GitHub token
     required: true
-  start-date:
-    description: date to start from
+  days-back:
+    description: number of days back to look for changes
     required: false
-    default: null
-  end-date:
-    description: date to end at
+    default: 14
+  date-range:
+    description: date range for changes (MM/DD/YYYY-MM/DD/YYYY). Overrides days-back if provided.
     required: false
     default: null
   timezone:
     description: timezone
     required: false
     default: null
-  file-output-name:
+  md-output-name:
     description: name of outputted markdown file
     required: false
-    default: 'CHANGELOG.md'
+    default: CHANGELOG
 
 outputs:
-  changelog: # id of output
-    description: the generated changelog in markdown format
+  filePath:
+    description: the path for the generated changelog in markdown format
 
 runs:
   using: node24
