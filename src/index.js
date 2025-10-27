@@ -95,7 +95,7 @@ const writeDeetsTofile = (deets) => {
     for (const line of deets[deet]) {
       if (line[0] === "#") {
         // heading line
-        finalLines.push(line);
+        finalLines.push(`\n${line}`);
         continue;
       }
       if (isListElement(line)) {
