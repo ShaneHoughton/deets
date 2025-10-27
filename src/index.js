@@ -2,14 +2,18 @@ import fs from "fs";
 import { DateTime } from "luxon";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import dotenv from "dotenv";
+dotenv.config();
 
-const START_DATE = core.getInput("start-date"); // MM/DD/YYYY
-const END_DATE = core.getInput("end-date"); // MM/DD/YYYY
-const TZ = core.getInput("timezone"); // e.g., "America/New_York"
-const OUTPUT_NAME = core.getInput("file-output-name"); // e.g., "CHANGELOG.md"
-const GITHUB_TOKEN = core.getInput("github-token", { required: true });
-core.info(GITHUB_TOKEN.length);
-
+const START_DATE = process.env.START_DATE || core.getInput("start-date"); // MM/DD/YYYY
+const END_DATE = process.env.END_DATE || core.getInput("end-date"); // MM/DD/YYYY
+const TZ = process.env.TZ || core.getInput("timezone"); // e.g., "America/New_York"
+const OUTPUT_NAME =
+  process.env.OUTPUT_NAME || core.getInput("file-output-name"); // e.g., "CHANGELOG.md"
+const GITHUB_TOKEN =
+  process.env.GITHUB_TOKEN || core.getInput("github-token", { required: true });
+const GH_OWNER = process.env.GH_OWNER || github.context.repo.owner;
+const GH_REPO = process.env.GH_REPO || github.context.repo.repo;
 const isListElement = (line) => {
   return /^(- |\d+\.\s|[a-zA-Z]\.\s)/.test(line);
 };
@@ -35,7 +39,7 @@ const extractContentFromTags = (body, sectionTitle) => {
     "ig"
   );
   const matches = [...body.matchAll(regex)].map((group) => group[1]);
-  const sections = matches.map((match) => match.trim().split("\n"));
+  const sections = matches.map((match) => match.trim().split("\n").filter(line => line.trim() !== ""));
   return sections.flat();
 };
 
@@ -69,16 +73,18 @@ const writeDeetsTofile = (deets) => {
     }
   }
 
-  fs.writeFileSync(`${OUTPUT_NAME}.md`, finalLines.join("\n"), "utf-8");
+  const filePath = `${OUTPUT_NAME}.md`;
+  fs.writeFileSync(filePath, finalLines.join("\n"), "utf-8");
+  console.log(`File written to: ${filePath}`);
+  return filePath;
 };
 
 const main = async () => {
   try {
     const octokit = github.getOctokit(GITHUB_TOKEN);
-    const { owner, repo } = github.context.repo;
     const { data } = await octokit.rest.pulls.list({
-      owner,
-      repo,
+      owner: GH_OWNER,
+      repo: GH_REPO,
       state: "all",
       sort: "long-running",
       per_page: 100,
@@ -88,9 +94,9 @@ const main = async () => {
     );
     const PRBodies = mergedPRs.map((pr) => pr.body);
     const deets = extractDeetsFromBodies(PRBodies);
-    writeDeetsTofile(deets);
+    const filePath = writeDeetsTofile(deets);
     core.info("Changelog generated successfully.");
-    core.info(deets)
+    core.setOutput("filePath", filePath);
   } catch (error) {
     core.setFailed(error.message);
   }
