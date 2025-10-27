@@ -3,10 +3,10 @@ import { DateTime } from "luxon";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 
-const START_DATE = core.getInput("start_date"); // MM/DD/YYYY
-const END_DATE = core.getInput("end_date"); // MM/DD/YYYY
+const START_DATE = core.getInput("start-date"); // MM/DD/YYYY
+const END_DATE = core.getInput("end-date"); // MM/DD/YYYY
 const TZ = core.getInput("timezone"); // e.g., "America/New_York"
-const OUTPUT_NAME = core.getInput("output_name"); // e.g., "CHANGELOG.md"
+const OUTPUT_NAME = core.getInput("file-output-name"); // e.g., "CHANGELOG.md"
 const TOKEN = core.getInput("github_token");
 
 const isListElement = (line) => {
