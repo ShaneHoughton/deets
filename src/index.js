@@ -88,6 +88,8 @@ const main = async () => {
     const PRBodies = mergedPRs.map((pr) => pr.body);
     const deets = extractDeetsFromBodies(PRBodies);
     writeDeetsTofile(deets);
+    core.info("Changelog generated successfully.");
+    core.info(deets)
   } catch (error) {
     core.setFailed(error.message);
   }
