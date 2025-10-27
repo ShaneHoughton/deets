@@ -73,7 +73,7 @@ const writeDeetsTofile = (deets) => {
 
 const main = async () => {
   try {
-    const octokit = github.getOctokit(TOKEN);
+    const octokit = github.getOctokit(github.context.token);
     const { owner, repo } = github.context.repo;
     const { data } = await octokit.rest.pulls.list({
       owner,

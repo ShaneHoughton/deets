@@ -39381,7 +39381,7 @@ const START_DATE = coreExports.getInput("start-date"); // MM/DD/YYYY
 const END_DATE = coreExports.getInput("end-date"); // MM/DD/YYYY
 const TZ = coreExports.getInput("timezone"); // e.g., "America/New_York"
 const OUTPUT_NAME = coreExports.getInput("file-output-name"); // e.g., "CHANGELOG.md"
-const TOKEN = coreExports.getInput("github_token");
+coreExports.getInput("github_token");
 
 const isListElement = (line) => {
   return /^(- |\d+\.\s|[a-zA-Z]\.\s)/.test(line);
@@ -39447,7 +39447,7 @@ const writeDeetsTofile = (deets) => {
 
 const main = async () => {
   try {
-    const octokit = githubExports.getOctokit(TOKEN);
+    const octokit = githubExports.getOctokit(githubExports.context.token);
     const { owner, repo } = githubExports.context.repo;
     const { data } = await octokit.rest.pulls.list({
       owner,
