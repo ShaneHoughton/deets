@@ -1,0 +1,28 @@
+name: Get the deets
+description: Get the details about changes from merged pull requests and output them to a markdown file.
+
+inputs:
+  start-date:
+    description: date to start from
+    required: false
+    default: null
+  end-date:
+    description: date to end at
+    required: false
+    default: null
+  timezone:
+    description: timezone
+    required: false
+    default: null
+  file-output-name:
+    description: name of outputted markdown file
+    required: false
+    default: 'CHANGELOG.md'
+
+outputs:
+  changelog: # id of output
+    description: the generated changelog in markdown format
+
+runs:
+  using: node22
+  main: dist/index.js
