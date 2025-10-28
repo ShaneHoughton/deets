@@ -5,18 +5,25 @@ inputs:
   github-token:
     description: GitHub token
     required: true
+  branch:
+    description: branch to check changes against
+    required: true
+  state:
+    description: state of pull requests to consider (closed, open, all)
+    required: false
+    default: closed
   days-back:
-    description: number of days back to look for changes
+    description: number of days to look back on for changes
     required: false
     default: 14
   date-range:
-    description: date range for changes (MM/DD/YYYY-MM/DD/YYYY). Overrides days-back if provided.
+    description: a date range (MM/DD/YYYY - MM/DD/YYYY) or date to start at (MM/DD/YYYY). Overrides days-back if provided.
     required: false
     default: null
   timezone:
     description: timezone
     required: false
-    default: null
+    default: utc
   md-output-name:
     description: name of outputted markdown file
     required: false

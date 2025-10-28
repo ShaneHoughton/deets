@@ -5,14 +5,16 @@ import * as github from "@actions/github";
 import dotenv from "dotenv";
 dotenv.config();
 
-const DAYS_BACK = process.env.DAYS_BACK || core.getInput("days-back") || 14;
-const DATE_RANGE = process.env.DATE_RANGE || core.getInput("date-range");
-const TZ = process.env.TZ || core.getInput("timezone");
-const OUTPUT_NAME = process.env.OUTPUT_NAME || core.getInput("md-output-name");
 const GITHUB_TOKEN =
   process.env.GITHUB_TOKEN || core.getInput("github-token", { required: true });
 const GH_OWNER = process.env.GH_OWNER || github.context.repo.owner;
 const GH_REPO = process.env.GH_REPO || github.context.repo.repo;
+const BRANCH = process.env.BRANCH || core.getInput("branch");
+const STATE = process.env.STATE || core.getInput("state");
+const DAYS_BACK = process.env.DAYS_BACK || core.getInput("days-back");
+const DATE_RANGE = process.env.DATE_RANGE || core.getInput("date-range");
+const TZ = process.env.TZ || core.getInput("timezone");
+const OUTPUT_NAME = process.env.OUTPUT_NAME || core.getInput("md-output-name");
 
 // regex
 const isListElement = (line) => {
@@ -30,13 +32,13 @@ const setupDates = () => {
     endDate = createUTCDate(end);
     return;
   }
-  console.log('no date range', DAYS_BACK)
   if (DAYS_BACK > 0) startDate = createUTCDate().minus({ days: DAYS_BACK });
   else startDate = createUTCDate();
 };
 
 const isBetweenDates = (pr) => {
-  const mergedDate = DateTime.fromISO(pr.merged_at).toUTC();
+  const prDate = pr.state === "open" ? pr.created_at : pr.merged_at;
+  const mergedDate = DateTime.fromISO(prDate).toUTC();
   if (DATE_RANGE && endDate) {
     return mergedDate >= startDate && mergedDate <= endDate;
   }
@@ -45,12 +47,19 @@ const isBetweenDates = (pr) => {
 
 const createUTCDate = (dateString) => {
   if (!dateString) return DateTime.now().toUTC(); // returns today's date
-  return DateTime.fromFormat(dateString, "MM/dd/yyyy", {
-    zone: TZ,
-  }).toUTC();
+  return DateTime.fromFormat(dateString, "MM/dd/yy", { zone: TZ }).toUTC();
 };
 
 // extracting details
+const fitsStateCriteria = (pr) => {
+  const wasClosedAndMerged = pr.merged_at !== null && pr.state === "closed";
+  const isOpen = pr.state === "open";
+  if (STATE === "closed") return wasClosedAndMerged;
+  if (STATE === "open") return isOpen;
+  if (STATE === "all") return wasClosedAndMerged || isOpen;
+  return false;
+};
+
 const extractContentFromTags = (body, sectionTitle) => {
   const regex = new RegExp(
     `<${sectionTitle}>([\\s\\S]*?)</${sectionTitle}>`,
@@ -115,7 +124,6 @@ const writeDeetsTofile = (deets) => {
   return filePath;
 };
 
-
 // main logic
 const main = async () => {
   setupDates();
@@ -124,12 +132,13 @@ const main = async () => {
     const { data } = await octokit.rest.pulls.list({
       owner: GH_OWNER,
       repo: GH_REPO,
-      state: "all",
+      base: BRANCH,
+      state: STATE,
       sort: "long-running",
       per_page: 100,
     });
     const mergedPRs = data.filter(
-      (pr) => pr.merged_at !== null && isBetweenDates(pr)
+      (pr) => fitsStateCriteria(pr) && isBetweenDates(pr)
     );
     const PRInfo = mergedPRs.map((pr) => ({
       body: pr.body,
