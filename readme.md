@@ -40,7 +40,7 @@ To make it easier for developers to copy and use these tags, you can include the
 ## Inputs
 ```yaml
   id: deets
-  uses: ShaneHoughton/deets@v0
+  uses: ShaneHoughton/deets@v1
   with:
     github-token:
     # Your github token from ${{ secrets.GITHUB_TOKEN }}
@@ -65,7 +65,7 @@ To make it easier for developers to copy and use these tags, you can include the
 | -- | -- | -- |
 | filePath | The name of the markdown file generated from the action. | DEETS.md | 
 ## Getting the markdown file:
-To make getting this markdown file easier, you can append the [upload-artifact](https://github.com/actions/upload-artifact) action which allows you do upload the file as an artifact on your repo and make it available for download.
+To make getting this markdown file easier, you can append the [upload-artifact](https://github.com/actions/upload-artifact) action which allows you to upload the file as an artifact on your repo and make it available for download.
 ```yaml
   uses: actions/upload-artifact@v4
   with:
