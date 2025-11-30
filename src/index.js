@@ -124,22 +124,42 @@ const writeDeetsTofile = (deets) => {
   return filePath;
 };
 
-// main logic
-const main = async () => {
-  setupDates();
-  try {
-    const octokit = github.getOctokit(GITHUB_TOKEN);
+const getPullRequestDataWithPagination = async () => {
+  const octokit = github.getOctokit(GITHUB_TOKEN);
+  let shouldPaginate = true;
+  let pageNumber = 1;
+  const mergedPRs = [];
+  while (shouldPaginate) {
     const { data } = await octokit.rest.pulls.list({
       owner: GH_OWNER,
       repo: GH_REPO,
       base: BRANCH,
       state: STATE,
-      sort: "long-running",
+      sort: "created",
+      direction: "desc",
       per_page: 100,
+      page: pageNumber,
     });
-    const mergedPRs = data.filter(
-      (pr) => fitsStateCriteria(pr) && isBetweenDates(pr)
-    );
+    if (data.length > 0 && isBetweenDates(data[0])) {
+      console.log(data.length);
+      const filteredPRs = data.filter(
+        (pr) => fitsStateCriteria(pr) && isBetweenDates(pr)
+      );
+      console.log(filteredPRs.length);
+      mergedPRs.push(...filteredPRs);
+      pageNumber++;
+      continue;
+    }
+    shouldPaginate = false;
+  }
+  return mergedPRs;
+};
+
+// main logic
+const main = async () => {
+  setupDates();
+  try {
+    const mergedPRs = await getPullRequestDataWithPagination();
     const PRInfo = mergedPRs.map((pr) => ({
       body: pr.body,
       title: pr.title,
